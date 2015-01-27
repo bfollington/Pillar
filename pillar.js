@@ -9,6 +9,114 @@ Pillar.extendEvents = function(view) {
     view.events = _.extend({}, Pillar.superOf(view).events, view.events);
 }
 
+Pillar.Templates = {
+    templates: {},
+
+    register: function(name, html)
+    {
+        this.templates[name] = html;
+    },
+
+    get: function(name)
+    {
+        var templates = this.templates;
+        return function() { return templates[name] };
+    },
+
+    smartRegister: function(name)
+    {
+        this.register(name, Pillar.Templates.template( $("#_" + name + "_template").html() ));
+    },
+
+    evalIfFunction: function(obj, attr)
+    {
+        if (typeof obj[attr] == "function")
+        {
+            return obj[attr]();
+        } else if (typeof obj.get(attr) == "string")
+        {
+            return obj.get(attr);
+        } else {
+            return "";
+        }
+    },
+
+    getPlaceholder: function(string)
+    {
+        return "{{"+string+"}}";
+    },
+
+    // TODO: optimisation where we return a function from there, that concats string fragments and an attrs object using .join
+    // Need to split final HTML string at {{tokens}};
+    compileTemplate: function($template)
+    {
+        var $html = $template.clone();
+        var $elems = $html.find("[data-link]").toArray();
+
+        if (typeof $html.attr("data-link") != "undefined")
+        {
+            $elems.unshift($html);
+        }
+
+        _.each($elems, function(elem)
+        {
+            var $el = $(elem);
+            var links = $el.attr("data-link");
+            var toLink = links.split(",");
+
+            $.each(toLink, function(index, property)
+            {
+                var trimmed = property.trim();
+                var splitTerm = trimmed.split("<-");
+                var attr = splitTerm[0];
+                var valueName = splitTerm[1];
+
+                var specialAttrs = {
+                    "extraClass": function($el) {
+                        $el.addClass(Pillar.Templates.getPlaceholder(valueName));
+                    },
+                    "visible": function($el) {
+                        $el.attr("data-visible", Pillar.Templates.getPlaceholder(valueName));
+                    },
+                    "hidden": function($el) {
+                        $el.attr("data-hidden", Pillar.Templates.getPlaceholder(valueName));
+                    },
+                    "text": function($el) {
+                        $el.html(Pillar.Templates.getPlaceholder(valueName));
+                    }
+                };
+
+                if (attr in specialAttrs)
+                {
+                    specialAttrs[attr]($el);
+                } else {
+                    $el.attr(attr, Pillar.Templates.getPlaceholder(valueName));
+                }
+            });
+
+            $el.removeAttr("data-link");
+            $el.attr("data-linked", "true");
+        });
+
+        return $html.clone().wrap("<div/>").parent().html();
+    },
+
+    template: function(html)
+    {
+        return this.compileTemplate($(html));
+    },
+
+    renderTemplate: function(html, attrs)
+    {
+        var regexp = /\{\{([^}}]+)\}\}/g;
+        var replaced = html.replace(regexp, function($0, $1) {
+            return Pillar.Templates.evalIfFunction(attrs, $1);
+        });
+
+        return replaced;
+    }
+}
+
 Pillar.View = Backbone.View.extend({
     initialize: function(opts)
     {
@@ -25,6 +133,8 @@ Pillar.View = Backbone.View.extend({
 
         this.init(opts);
     },
+
+    renderTemplate: Pillar.Templates.renderTemplate,
 
     _super: function()
     {
@@ -124,3 +234,11 @@ Pillar.ExtendedTextView = Pillar.TestView.extend({
         console.log("Child INIT");
     }
 });
+
+
+// jQuery helper
+$("script.js-template").each( function() {
+    var niceName = $(this).attr("id").replace("_template", "").replace("_", "");
+    Pillar.Templates.smartRegister(niceName);
+});
+
