@@ -153,6 +153,13 @@ Pillar.View = Backbone.View.extend({
         this.init(opts);
     },
 
+    replaceElement: function(html)
+    {
+        var $oldEl = this.$el;
+        this.setElement(html);
+        $oldEl.replaceWith(this.$el);
+    },
+
     renderTemplate: Pillar.Templates.renderTemplate,
 
     _super: function()
