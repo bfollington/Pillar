@@ -1,10 +1,11 @@
 # pillar
-An extension layer built on Backbone.js, pillar provides extended functionality for handling Views.
+An extension layer built on Backbone.js, `pillar` provides extended functionality for handling views and templating.
 
 ## Views
 
-The primary function of pillar is to enable full extension of views, normally in backbone extending a view does not merge the events of the subclass with the superclass. Nor do the initialize functions stack how one might want.
+The primary function of pillar is to enable full extension of views, normally in backbone extending a view does not merge the events of the subclass with the superclass. Nor do the initialize functions stack.
 
+```javascript
     Pillar.BaseTestView = Pillar.View.extend({
 
         init: function(opts)
@@ -26,10 +27,11 @@ The primary function of pillar is to enable full extension of views, normally in
 
         init: function(opts)
         {
+            // implicit super.init(opts);
             console.log("INIT");
         },
 
-        events: {
+        events: { // inherits "click": "helloWorld"
             "click .all": "whatUp"
         },
 
@@ -42,13 +44,23 @@ The primary function of pillar is to enable full extension of views, normally in
     Pillar.ExtendedTestView = Pillar.TestView.extend({
         init: function(opts)
         {
+            // implicit super.super.init(opts);
+            // implicit super.init(opts);
             console.log("Child INIT");
         }
+        
+        // inherits events: { 
+        //    "click": "helloWorld",
+        //    "click .all": "whatUp"
+        //},
     });
+```
 
-`Pillar.ExtendedTestView` has the events: {"click": "helloWorld", "click .all": "whatUp"}, and when it is initialized "Base INIT", "INIT" and "Child INIT" will print, in that order.
+`Pillar.ExtendedTestView` has the events: `{"click": "helloWorld", "click .all": "whatUp"}`, and when it is initialized "Base INIT", "INIT" and "Child INIT" will print, in that order.
 
 To accomplish view extension, pillar expects you to use `init` and `draw` to extend, rather than `initialize` and `render`.
+
+To override this behaviour, `initialize` and `render` can also be overridden to allow full customisation.
 
 ### Collection Views
 
@@ -58,18 +70,25 @@ Pillar provides `CollectionView`s which allow simple management of subviews.
 
 Pillar allows a declarative syntax for populating your html templates.
 
+```html
     <div data-pillar="id<-id">
         <a data-pillar="href<-link, text<-title"></a>
     </div>
+```
 
-Rendering this using `{id: 123, link: "http://google.com", title: "Google"}, gives:
+Rendering this using `{id: 123, link: "http://google.com", title: "Google"}`, gives:
 
+```html
     <div id="123">
         <a href="http://google.com">Google</a>
     </div>
+```
+
+Templates support JSON Objects or actual Backbone models being passed. You can bind either attributes on the model object, or methods. Providing `{ id: function() { return Math.random(); } }` will actually evaluate the id function on render.
 
 The templating system is drop-in, and I tend to use it as so:
 
+```javascript
     //Global
     Pillar.Templates.register("my_template", $("#my_template").html());
 
@@ -81,6 +100,7 @@ The templating system is drop-in, and I tend to use it as so:
         var html = this.renderTemplate(this.template, this.model);
         this.replaceElement(html);
     }
+```
 
 ## Dependencies
 
