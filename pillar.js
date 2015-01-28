@@ -35,7 +35,7 @@ Pillar.Templates = {
         } else if (typeof obj[attr] != "undefined")
         {
             return obj[attr];
-        } else if (typeof obj.get(attr) != "undefined")
+        } else if (typeof obj.get == "function" && typeof obj.get(attr) != "undefined")
         {
             return obj.get(attr);
         } else {
