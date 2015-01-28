@@ -27,10 +27,11 @@ The primary function of pillar is to enable full extension of views, normally in
 
         init: function(opts)
         {
+            // implicit super.init(opts);
             console.log("INIT");
         },
 
-        events: {
+        events: { // inherits "click": "helloWorld"
             "click .all": "whatUp"
         },
 
@@ -43,14 +44,23 @@ The primary function of pillar is to enable full extension of views, normally in
     Pillar.ExtendedTestView = Pillar.TestView.extend({
         init: function(opts)
         {
+            // implicit super.super.init(opts);
+            // implicit super.init(opts);
             console.log("Child INIT");
         }
+        
+        // inherits events: { 
+        //    "click": "helloWorld",
+        //    "click .all": "whatUp"
+        //},
     });
 ```
 
 `Pillar.ExtendedTestView` has the events: `{"click": "helloWorld", "click .all": "whatUp"}`, and when it is initialized "Base INIT", "INIT" and "Child INIT" will print, in that order.
 
 To accomplish view extension, pillar expects you to use `init` and `draw` to extend, rather than `initialize` and `render`.
+
+To override this behaviour, `initialize` and `render` can also be overridden to allow full customisation.
 
 ### Collection Views
 
@@ -66,13 +76,15 @@ Pillar allows a declarative syntax for populating your html templates.
     </div>
 ```
 
-Rendering this using `{id: 123, link: "http://google.com", title: "Google"}, gives:
+Rendering this using `{id: 123, link: "http://google.com", title: "Google"}`, gives:
 
 ```html
     <div id="123">
         <a href="http://google.com">Google</a>
     </div>
 ```
+
+Templates support JSON Objects or actual Backbone models being passed. You can bind either attributes on the model object, or methods. Providing `{ id: function() { return Math.random(); } }` will actually evaluate the id function on render.
 
 The templating system is drop-in, and I tend to use it as so:
 
