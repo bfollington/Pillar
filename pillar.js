@@ -263,11 +263,3 @@ Pillar.ExtendedTextView = Pillar.TestView.extend({
         console.log("Child INIT");
     }
 });
-
-
-// jQuery helper
-$("script.js-template").each( function() {
-    var niceName = $(this).attr("id").replace("_template", "").replace("_", "");
-    Pillar.Templates.smartRegister(niceName);
-});
-
