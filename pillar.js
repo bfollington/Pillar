@@ -163,6 +163,17 @@ Pillar.View = Backbone.View.extend({
         $oldEl.replaceWith(this.$el);
     },
 
+    defaultDraw: function()
+    {
+        var data = {};
+        if (this.model)
+        {
+            data = this.model.toJSON();
+        }
+        var html = Mustache.render(this.template, data);
+        this.replaceElement(html);
+    },
+
     renderTemplate: Pillar.Templates.renderTemplate,
 
     _super: function()
