@@ -274,3 +274,5 @@ Pillar.ExtendedTextView = Pillar.TestView.extend({
         console.log("Child INIT");
     }
 });
+
+module.exports = Pillar;
