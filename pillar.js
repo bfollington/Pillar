@@ -199,6 +199,9 @@ Pillar.View = Backbone.View.extend({
         this.beforeDraw();
         this.draw();
         this.afterDraw();
+
+        this.delegateEvents(this.events);
+
         return this;
     },
 
