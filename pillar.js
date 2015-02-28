@@ -9,6 +9,11 @@ Pillar.extendEvents = function(view) {
     view.events = _.extend({}, Pillar.superOf(view).events, view.events);
 }
 
+Pillar.template = function(name)
+{
+    return $("[data-template='" + name + "']").html();
+}
+
 Pillar.Templates = {
     templates: {},
 
